@@ -52,6 +52,7 @@ const cssRegex = /\.css$/;
 const cssModuleRegex = /\.module\.css$/;
 const sassRegex = /\.(scss|sass)$/;
 const sassModuleRegex = /\.module\.(scss|sass)$/;
+const lessRegex = /\.less$/;
 
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
@@ -77,6 +78,15 @@ module.exports = function(webpackEnv) {
     : isEnvDevelopment && '';
   // Get environment variables to inject into our app.
   const env = getClientEnvironment(publicUrl);
+
+  // get antd theme file (if exist)
+  const getAntdTheme = () => {
+    const themeFile = `${paths.appSrc}/theme.js`;
+    if (!fs.existsSync(themeFile)) {
+      return {};
+    }
+    return require(themeFile);
+  };
 
   // common function to get style loaders
   const getStyleLoaders = (cssOptions, preProcessor) => {
@@ -124,6 +134,20 @@ module.exports = function(webpackEnv) {
         },
       });
     }
+    return loaders;
+  };
+
+  // get antd style loaders
+  const getAntdStyleLoaders = cssOptions => {
+    const loaders = getStyleLoaders(cssOptions);
+    loaders.push({
+      loader: require.resolve('less-loader'),
+      options: {
+        sourceMap: isEnvProduction && shouldUseSourceMap,
+        modifyVars: getAntdTheme(),
+        javascriptEnabled: true,
+      },
+    });
     return loaders;
   };
 
@@ -365,7 +389,7 @@ module.exports = function(webpackEnv) {
                 // side of caution.
                 // We remove this when the user ejects because the default
                 // is sane and uses Babel options. Instead of options, we use
-                // the react-scripts and babel-preset-react-app versions.
+                // the react-scripts-enhanced and babel-preset-react-app versions.
                 cacheIdentifier: getCacheIdentifier(
                   isEnvProduction
                     ? 'production'
@@ -374,7 +398,7 @@ module.exports = function(webpackEnv) {
                     'babel-plugin-named-asset-import',
                     'babel-preset-react-app',
                     'react-dev-utils',
-                    'react-scripts',
+                    'react-scripts-enhanced',
                   ]
                 ),
                 // @remove-on-eject-end
@@ -425,7 +449,7 @@ module.exports = function(webpackEnv) {
                     'babel-plugin-named-asset-import',
                     'babel-preset-react-app',
                     'react-dev-utils',
-                    'react-scripts',
+                    'react-scripts-enhanced',
                   ]
                 ),
                 // @remove-on-eject-end
@@ -499,6 +523,20 @@ module.exports = function(webpackEnv) {
                 },
                 'sass-loader'
               ),
+            },
+            // Adds support for Ant Design
+            {
+              test: lessRegex,
+              include: /node_modules\/antd/,
+              use: getAntdStyleLoaders({
+                importLoaders: 2,
+                sourceMap: isEnvProduction && shouldUseSourceMap,
+              }),
+              // Don't consider CSS imports dead code even if the
+              // containing package claims to have no side effects.
+              // Remove this when webpack adds a warning or an error for this.
+              // See https://github.com/webpack/webpack/issues/6571
+              sideEffects: true,
             },
             // "file" loader makes sure those assets get served by WebpackDevServer.
             // When you `import` an asset, you get its (virtual) filename.

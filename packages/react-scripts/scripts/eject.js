@@ -254,12 +254,12 @@ inquirer
         const ownContent =
           fs.readFileSync(paths.ownTypeDeclarations, 'utf8').trim() + os.EOL;
 
-        // Remove react-scripts reference since they're getting a copy of the types in their project
+        // Remove react-scripts-enhanced reference since they're getting a copy of the types in their project
         content =
           content
-            // Remove react-scripts types
+            // Remove react-scripts-enhanced types
             .replace(
-              /^\s*\/\/\/\s*<reference\s+types.+?"react-scripts".*\/>.*(?:\n|$)/gm,
+              /^\s*\/\/\/\s*<reference\s+types.+?"react-scripts-enhanced".*\/>.*(?:\n|$)/gm,
               ''
             )
             .trim() + os.EOL;

@@ -127,10 +127,12 @@ const reactScriptsLinked =
   fs.existsSync(reactScriptsPath) &&
   fs.lstatSync(reactScriptsPath).isSymbolicLink();
 
-// config before publish: we're in ./packages/react-scripts/config/
+// config before publish: we're in ./packages/react-scripts-enhanced/config/
 if (
   !reactScriptsLinked &&
-  __dirname.indexOf(path.join('packages', 'react-scripts', 'config')) !== -1
+  __dirname.indexOf(
+    path.join('packages', 'react-scripts-enhanced', 'config')
+  ) !== -1
 ) {
   module.exports = {
     dotenv: resolveOwn('template/.env'),
